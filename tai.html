@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tài Xỉu Mobile</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 28px;
+      margin: 0 0 15px 0;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .dice-area {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .dice {
+      font-size: 48px;
+      margin: 10px 0;
+      letter-spacing: 8px;
+    }
+    .result {
+      font-size: 18px;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+    .bet-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    .bet-btn {
+      flex: 1;
+      padding: 18px 10px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    .bet-btn:active {
+      transform: scale(0.96);
+    }
+    .bet-btn.tai {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+      color: #fff;
+    }
+    .bet-btn.xiu {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: #fff;
+    }
+    .bet-btn.selected {
+      opacity: 1;
+      box-shadow: 0 0 0 3px #fff, 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .bet-btn:not(.selected) {
+      opacity: 0.7;
+    }
+    .current-bet {
+      font-size: 16px;
+      margin-bottom: 15px;
+      min-height: 24px;
+    }
+    .roll-btn {
+      width: 100%;
+      padding: 18px;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .roll-btn:active {
+      transform: scale(0.97);
+    }
+    .roll-btn:disabled {
+      background: #888;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .message {
+      margin-top: 18px;
+      font-size: 18px;
+      font-weight: 600;
+      min-height: 27px;
+    }
+    .win {
+      color: #aaffaa;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .lose {
+      color: #ffaaaa;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .info {
+      margin-top: 15px;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎲 Tài Xỉu 🎲</h1>
+
+    <div class="dice-area">
+      <div class="dice" id="diceDisplay">❓ ❓ ❓</div>
+      <div class="result" id="resultDisplay">Chưa lắc</div>
+    </div>
+
+    <div class="current-bet" id="currentBet">Chọn cửa cược bên dưới</div>
+
+    <div class="bet-buttons">
+      <button class="bet-btn tai" id="btnTai" onclick="selectBet('tai')">
+        TÀI<br><small>11 – 18</small>
+      </button>
+      <button class="bet-btn xiu" id="btnXiu" onclick="selectBet('xiu')">
+        XỈU<br><small>3 – 10</small>
+      </button>
+    </div>
+
+    <button class="roll-btn" id="rollBtn" onclick="rollDice()" disabled>
+      LẮC XÚC XẮC
+    </button>
+
+    <div class="message" id="message"></div>
+
+    <div class="info">
+      Chơi giải trí, không cá cược tiền thật.
+    </div>
+  </div>
+
+  <script>
+    let selectedBet = null;
+
+    function selectBet(bet) {
+      selectedBet = bet;
+
+      const btnTai = document.getElementById('btnTai');
+      const btnXiu = document.getElementById('btnXiu');
+      const currentBet = document.getElementById('currentBet');
+      const rollBtn = document.getElementById('rollBtn');
+      const message = document.getElementById('message');
+
+      if (bet === 'tai') {
+        btnTai.classList.add('selected');
+        btnXiu.classList.remove('selected');
+        currentBet.textContent = 'Bạn đang cược: TÀI';
+      } else {
+        btnXiu.classList.add('selected');
+        btnTai.classList.remove('selected');
+        currentBet.textContent = 'Bạn đang cược: XỈU';
+      }
+
+      rollBtn.disabled = false;
+      message.textContent = '';
+    }
+
+    function rollDice() {
+      if (!selectedBet) return;
+
+      const d1 = Math.floor(Math.random() * 6) + 1;
+      const d2 = Math.floor(Math.random() * 6) + 1;
+      const d3 = Math.floor(Math.random() * 6) + 1;
+      const sum = d1 + d2 + d3;
+
+      const diceIcons = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+      document.getElementById('diceDisplay').textContent =
+        diceIcons[d1 - 1] + ' ' + diceIcons[d2 - 1] + ' ' + diceIcons[d3 - 1];
+
+      let resultType = (sum >= 3 && sum <= 10) ? 'xiu' : 'tai';
+      const resultText = resultType === 'tai' ? 'TÀI' : 'XỈU';
+
+      document.getElementById('resultDisplay').textContent =
+        `Tổng: ${sum} → ${resultText}`;
+
+      const messageEl = document.getElementById('message');
+      if (selectedBet === resultType) {
+        messageEl.textContent = '🎉 Bạn THẮNG!';
+        messageEl.className = 'message win';
+      } else {
+        messageEl.textContent = '❌ Bạn THUA.';
+        messageEl.className = 'message lose';
+      }
+    }
+  </script>
+</body>
+</html>
